@@ -1,10 +1,7 @@
-import { CollaborativeApp } from "./CollaborativeApp";
-import { Room } from "./Room";
-
 export default function Page() {
   return (
-    <Room>
-      <CollaborativeApp />
-    </Room>
+    <div className="text-5xl text-white">
+      <h1>A Website Designer</h1>
+    </div>
   );
 }
