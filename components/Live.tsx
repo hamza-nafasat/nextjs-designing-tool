@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
-import { useMyPresence, useOthers } from "@liveblocks/react";
+import { useBroadcastEvent, useEventListener, useMyPresence, useOthers } from "@liveblocks/react";
 import CursorChat from "./cursor/CursorChat";
-import { CursorMode, CursorState, Reaction } from "@/types/type";
+import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
 import ReactionSelector from "./reactions/ReactionButton";
 import FlyingReaction from "./reactions/FlyingReactions";
 import useInterval from "@/hooks/useInterval";
@@ -15,9 +15,16 @@ const Live = () => {
   }) as any;
   const [reactions, setReactions] = useState<Reaction[]>([]);
 
+  const brodcast = useBroadcastEvent();
+
+  // remove unnecessary state saved emoji
+  useInterval(() => {
+    setReactions((reactions) => reactions.filter((reaction) => reaction.timestamp > Date.now() - 3000));
+  }, 1000);
+
+  //   show flying emojies
   useInterval(() => {
     if (cursorState.mode === CursorMode.Reaction && cursorState.isPressed && cursor) {
-      // concat all the reactions created on mouse click
       setReactions((reactions) =>
         reactions.concat([
           {
@@ -28,7 +35,29 @@ const Live = () => {
         ])
       );
     }
+
+    // brodcast event for other users
+    brodcast({
+      x: cursor?.x,
+      y: cursor?.y,
+      value: cursorState.reaction,
+    });
   }, 50);
+
+  //  received brodcast emojies from others
+  useEventListener((eventData) => {
+    const event = eventData.event as ReactionEvent;
+
+    setReactions((reactions) =>
+      reactions.concat([
+        {
+          point: { x: event.x, y: event.y },
+          value: event.value,
+          timestamp: Date.now(),
+        },
+      ])
+    );
+  });
 
   //   handle pointer move
   const handlePointerMove = useCallback(
