@@ -147,7 +147,7 @@ const Live = ({ canvasRef }: LiveProps) => {
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
     >
-      <h1 className="text-5xl text-white">Figma Clone</h1>
+      {/* <h1 className="text-5xl text-white">Figma Clone</h1> */}
 
       <canvas ref={canvasRef} />
 
